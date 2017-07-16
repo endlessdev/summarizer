@@ -3,8 +3,8 @@ package us.narin.summarizer;
 import kr.bydelta.koala.data.Morpheme;
 import kr.bydelta.koala.data.Sentence;
 import kr.bydelta.koala.data.Word;
-import kr.bydelta.koala.eunjeon.Tagger;
 import kr.bydelta.koala.hnn.SentenceSplitter;
+import kr.bydelta.koala.hnn.Tagger;
 import org.jgrapht.alg.interfaces.VertexScoringAlgorithm;
 import org.jgrapht.alg.scoring.PageRank;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -58,33 +58,27 @@ public class Summarizer {
             parsedSentence.put(sentence, detectedNouns);
         }
 
-        for (Map.Entry<String, List<String>> entry : parsedSentence.entrySet()) {
-            String key = entry.getKey();
-            graph.addVertex(key);
-        }
+        splitSentenceList.forEach(graph::addVertex);
 
         for (Map.Entry<String, List<String>> entrySource : parsedSentence.entrySet()) {
             for (Map.Entry<String, List<String>> entryTarget : parsedSentence.entrySet()) {
                 if (!Objects.equals(entrySource.getKey(), entryTarget.getKey())) {
 
-                    List<String> intersection = ListUtils.intersection(entrySource.getValue(), entryTarget.getValue());
-
-                    float similarity = (float) intersection.size() / (float) (Math.sqrt(entrySource.getValue().size()) * Math.sqrt(entryTarget.getValue().size()));
+                    float similarity = getSimilarity(entrySource, entryTarget);
 
                     if (similarity > 0 && graph.getEdge(entrySource.getKey(), entryTarget.getKey()) == null) {
                         DefaultWeightedEdge e = graph.addEdge(entrySource.getKey(), entryTarget.getKey());
                         graph.setEdgeWeight(e, similarity);
                     }
-
                 }
             }
         }
 
-        VertexScoringAlgorithm<String, Double> pr = new PageRank<>(graph);
-        List<Map.Entry<String, Double>> resultSentences = pr.getScores().entrySet()
+        VertexScoringAlgorithm<String, Double> pageRank = new PageRank<>(graph);
+        List<Map.Entry<String, Double>> resultSentences = pageRank.getScores().entrySet()
                 .stream()
                 .sorted((o1, o2) -> o1.getValue() < o2.getValue() ? 1 : -1)
-                .limit((long) (pr.getScores().entrySet().size() * 0.3))
+                .limit(3)
                 .collect(Collectors.toList())
                 .stream()
                 .sorted((source, target) -> {
@@ -92,18 +86,23 @@ public class Summarizer {
                     int targetIdx = 0;
                     for (int i = 0; i < splitSentenceList.size(); i++) {
                         String sentence = splitSentenceList.get(i);
-                        if (Objects.equals(sentence, source.getKey())) {
+                        if (Objects.equals(sentence, source.getKey()))
                             sourceIdx = i;
-                        } else if (Objects.equals(sentence, target.getKey())) {
+                        else if (Objects.equals(sentence, target.getKey()))
                             targetIdx = i;
-                        }
                     }
                     return sourceIdx > targetIdx ? 1 : -1;
                 }).collect(Collectors.toList());
 
-        System.out.println(resultSentences);
 
+        resultSentences.forEach(i -> System.out.print(i.getKey()));
     }
+
+    private static float getSimilarity(Map.Entry<String, List<String>> entrySource, Map.Entry<String, List<String>> entryTarget) {
+        List<String> intersection = ListUtils.intersection(entrySource.getValue(), entryTarget.getValue());
+        return (float) intersection.size() / (float) (Math.sqrt(entrySource.getValue().size()) * Math.sqrt(entryTarget.getValue().size()));
+    }
+
 }
 
 
