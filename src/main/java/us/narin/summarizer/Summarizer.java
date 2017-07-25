@@ -96,18 +96,9 @@ public class Summarizer {
                 .limit(3)
                 .collect(Collectors.toList())
                 .stream()
-                .sorted((source, target) -> {
-                    int sourceIdx = 0;
-                    int targetIdx = 0;
-                    for (int i = 0; i < splitSentenceList.size(); i++) {
-                        String sentence = splitSentenceList.get(i);
-                        if (Objects.equals(sentence, source.getKey()))
-                            sourceIdx = i;
-                        else if (Objects.equals(sentence, target.getKey()))
-                            targetIdx = i;
-                    }
-                    return sourceIdx > targetIdx ? 1 : -1;
-                }).collect(Collectors.toList());
+                .sorted((source, target) ->
+                        splitSentenceList.indexOf(source.getKey()) > splitSentenceList.indexOf(target.getKey()) ? 1 : -1)
+                .collect(Collectors.toList());
 
     }
 
