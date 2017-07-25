@@ -12,31 +12,30 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import scala.collection.Iterator;
 import us.narin.summarizer.utils.ListUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Summarizer {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    private Tagger tagger;
+    private SentenceSplitter sentenceSplitter;
+    private String content;
+    private List<String> splitSentenceList;
 
-        Tagger tagger = new Tagger();
-        SentenceSplitter sentenceSplitter = new SentenceSplitter();
+    public Summarizer(String content) {
+        this.content = content;
+        this.tagger = new Tagger();
+        this.sentenceSplitter = new SentenceSplitter();
+        this.splitSentenceList = new ArrayList<>();
+    }
 
-        String content = new Scanner(new File("./test.txt")).useDelimiter("\\Z").next();
+    List<String> summarize() {
+        return getRankedSentences().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+    }
 
-        List<String> splitSentenceList = sentenceSplitter
-                .jSentences(content)
-                .stream()
-                .map(String::trim)
-                .collect(Collectors.toList());
+    private Map<String, List<String>> extractSentences(List<String> splitSentenceList) {
 
-        Map<String, List<String>> parsedSentence = new LinkedHashMap<>();
-
-        SimpleWeightedGraph<String, DefaultWeightedEdge> graph =
-                new SimpleWeightedGraph<>
-                        (DefaultWeightedEdge.class);
+        final Map<String, List<String>> parsedSentence = new LinkedHashMap<>();
 
         for (String sentence : splitSentenceList) {
             Sentence analyzedSentence = tagger.tagSentence(sentence);
@@ -57,7 +56,20 @@ public class Summarizer {
             }
             parsedSentence.put(sentence, detectedNouns);
         }
+        return parsedSentence;
+    }
 
+    private SimpleWeightedGraph<String, DefaultWeightedEdge> buildGraph() {
+
+        SimpleWeightedGraph<String, DefaultWeightedEdge> graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+
+        splitSentenceList = sentenceSplitter
+                .jSentences(content)
+                .stream()
+                .map(String::trim)
+                .collect(Collectors.toList());
+
+        Map<String, List<String>> parsedSentence = extractSentences(splitSentenceList);
         splitSentenceList.forEach(graph::addVertex);
 
         for (Map.Entry<String, List<String>> entrySource : parsedSentence.entrySet()) {
@@ -73,9 +85,12 @@ public class Summarizer {
                 }
             }
         }
+        return graph;
+    }
 
-        VertexScoringAlgorithm<String, Double> pageRank = new PageRank<>(graph);
-        List<Map.Entry<String, Double>> resultSentences = pageRank.getScores().entrySet()
+    private List<Map.Entry<String, Double>> getRankedSentences() {
+        VertexScoringAlgorithm<String, Double> pageRank = new PageRank<>(buildGraph());
+        return pageRank.getScores().entrySet()
                 .stream()
                 .sorted((o1, o2) -> o1.getValue() < o2.getValue() ? 1 : -1)
                 .limit(3)
@@ -94,11 +109,9 @@ public class Summarizer {
                     return sourceIdx > targetIdx ? 1 : -1;
                 }).collect(Collectors.toList());
 
-
-        resultSentences.forEach(i -> System.out.print(i.getKey()));
     }
 
-    private static float getSimilarity(Map.Entry<String, List<String>> entrySource, Map.Entry<String, List<String>> entryTarget) {
+    private float getSimilarity(Map.Entry<String, List<String>> entrySource, Map.Entry<String, List<String>> entryTarget) {
         List<String> intersection = ListUtils.intersection(entrySource.getValue(), entryTarget.getValue());
         return (float) intersection.size() / (float) (Math.sqrt(entrySource.getValue().size()) * Math.sqrt(entryTarget.getValue().size()));
     }
