@@ -1,0 +1,31 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'us.narin.summarizer'
+version = '1.0-SNAPSHOT'
+
+description = """summarizer-java"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+
+repositories {
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+dependencies {
+    compile group: 'kr.bydelta', name: 'koalanlp-hannanum_2.12', version:'1.5.4', classifier:'assembly'
+    compile group: 'kr.bydelta', name: 'koalanlp-twitter_2.12', version:'1.5.4'
+    compile group: 'kr.bydelta', name: 'koalanlp-komoran_2.11', version:'1.5.1'
+    compile group: 'kr.bydelta', name: 'koalanlp-eunjeon_2.12', version:'1.5.4'
+    compile group: 'kr.bydelta', name: 'koalanlp-kkma_2.12', version:'1.5.4', classifier:'assembly'
+    compile group: 'kr.bydelta', name: 'koalanlp-komoran_2.12', version:'1.5.4', classifier:'assembly'
+    compile group: 'kr.bydelta', name: 'koalanlp-core_2.12', version:'1.5.4'
+    compile group: 'kr.bydelta', name: 'koalanlp-kryo_2.12', version:'1.5.4'
+    compile group: 'net.sf.jung', name: 'jung-api', version:'2.1.1'
+    compile group: 'net.sf.jung', name: 'jung-graph-impl', version:'2.1.1'
+    compile group: 'org.jgrapht', name: 'jgrapht-core', version:'1.0.1'
+    compile group: 'jgraph', name: 'jgraph', version:'5.13.0.0'
+    testCompile group: 'junit', name: 'junit', version:'3.8.1'
+}
