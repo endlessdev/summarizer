@@ -1,6 +1,7 @@
-package us.narin.summarizer;
+package us.narin.summarizer.utils;
 
 import org.json.JSONArray;
+import us.narin.summarizer.Summarizer;
 
 /**
  * Created by endlessdev on 7/28/17.

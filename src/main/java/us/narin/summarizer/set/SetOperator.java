@@ -1,4 +1,4 @@
-package us.narin.summarizer.utils;
+package us.narin.summarizer.set;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import java.util.Set;
  * Created by endlessdev on 7/8/17.
  */
 
-public class ListUtils {
+public class SetOperator {
 
     public static <T> List<T> union(List<T> list1, List<T> list2) {
         Set<T> set = new HashSet<>();
