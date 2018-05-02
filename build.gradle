@@ -16,11 +16,6 @@ repositories {
 }
 dependencies {
     compile group: 'kr.bydelta', name: 'koalanlp-hannanum_2.12', version:'1.5.4', classifier:'assembly'
-    compile group: 'kr.bydelta', name: 'koalanlp-twitter_2.12', version:'1.5.4'
-    compile group: 'kr.bydelta', name: 'koalanlp-komoran_2.11', version:'1.5.1'
-    compile group: 'kr.bydelta', name: 'koalanlp-eunjeon_2.12', version:'1.5.4'
-    compile group: 'kr.bydelta', name: 'koalanlp-kkma_2.12', version:'1.5.4', classifier:'assembly'
-    compile group: 'kr.bydelta', name: 'koalanlp-komoran_2.12', version:'1.5.4', classifier:'assembly'
     compile group: 'kr.bydelta', name: 'koalanlp-core_2.12', version:'1.5.4'
     compile group: 'kr.bydelta', name: 'koalanlp-kryo_2.12', version:'1.5.4'
     compile group: 'net.sf.jung', name: 'jung-api', version:'2.1.1'
